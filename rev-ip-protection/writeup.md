@@ -53,23 +53,19 @@ Looking for the string `"invalid license key"` at the dump, one finds the releva
 ```
 let p :: Prelude.Integer
             p =
-              0xFC497367DE3520436E844080242730ACAF44F16C31AD45070F6E28455A2DA126F1242008E5D29624A
-0F47B2D28E9963A7CBFA75D
+              0xFC497367DE3520436E844080242730ACAF44F16C31AD45070F6E28455A2DA126F1242008E5D29624A0F47B2D28E9963A7CBFA75D
             -- IdProp: p[IdP_keep]
         in  let q :: Prelude.Integer
                 q =
-                  0xC68F4A48226124EB1D0FDDDCEACEC20253FDAD180D63BEB0057508A08ACF60EAF63E62FD6727C
-582A085D4227410364E4E755205
+                  0xC68F4A48226124EB1D0FDDDCEACEC20253FDAD180D63BEB0057508A08ACF60EAF63E62FD6727C582A085D4227410364E4E755205
                 -- IdProp: q[IdP_keep]
             in  let c1 :: Prelude.Integer
                     c1 =
-                      0x6138C614261B2F71D9DC990CD6865F8A178994094349A7C4ED286D8D23E2862674C058976
-3725CDF1A08EF1DFBC89E703066A73C
+                      0x6138C614261B2F71D9DC990CD6865F8A178994094349A7C4ED286D8D23E2862674C0589763725CDF1A08EF1DFBC89E703066A73C
                     -- IdProp: c1[IdP_keep]
                 in  let c2 :: Prelude.Integer
                         c2 =
-                          0x8AD2F15273E7933543E6761E3EA030650890F3233113D1DD04F43A30798A4EFFC8A7A
-3F9F05CC9290FC990841A9198423642C7EF
+                          0x8AD2F15273E7933543E6761E3EA030650890F3233113D1DD04F43A30798A4EFFC8A7A3F9F05CC9290FC990841A9198423642C7EF
                         -- IdProp: c2[IdP_keep]
 
 [...]
@@ -77,8 +73,7 @@ let p :: Prelude.Integer
                                 (PrimIf
                                    (_m__ Prelude.PrimUnit)
                                    (PrimBNot
-                                      (PrimIntegerEQ (PrimIntegerRem (PrimIntegerAdd q (PrimInteg
-erMul k c2)) p) 2))
+                                      (PrimIntegerEQ (PrimIntegerRem (PrimIntegerAdd q (PrimIntegerMul k c2)) p) 2))
                                    (.Prelude.bind _m__ _tcdict1546
                                       Prelude.PrimUnit
                                       Prelude.PrimUnit
@@ -105,25 +100,21 @@ erMul k c2)) p) 2))
                                                      (PrimOrd
                                                         Prelude.Bool
                                                         1
-                                                        (Prelude.True (PrimBuildUndefined Pre
-lude.PrimUnit _ 1)))
+                                                        (Prelude.True (PrimBuildUndefined Prelude.PrimUnit _ 1)))
                                                      (Prelude.toPrimAction=
                                                         Prelude.PrimUnit
                                                         (Prelude.bind_=
                                                            Prelude.ActionValue
                                                            Prelude.PrimUnit
                                                            Prelude.PrimUnit
-                                                           Prelude.Prelude.Monad~Prelude.ActionVa
-lue=
+                                                           Prelude.Prelude.Monad~Prelude.ActionValue=
                                                            (Prelude.fromPrimAction=
                                                               Prelude.PrimUnit
                                                               (Prelude.$display "invalid license key"))
-                                                           (Prelude.$finish= (PrimIntegerToBit
-2 1))))))))
+                                                           (Prelude.$finish= (PrimIntegerToBit 2 1))))))))
 ```
 
-So the message is printed whenever `(PrimBNot (PrimIntegerEQ (PrimIntegerRem (PrimIntegerAdd q (PrimInteg
-erMul k c2)) p) 2))` or, in alternate syntax, whenever `(q + k*c2) % p != 2`.
+So the message is printed whenever `(PrimBNot (PrimIntegerEQ (PrimIntegerRem (PrimIntegerAdd q (PrimIntegerMul k c2)) p) 2))` or, in alternate syntax, whenever `(q + k*c2) % p != 2`.
 
 
 ## Solving the equation
