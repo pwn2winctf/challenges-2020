@@ -8,4 +8,4 @@ systemctl enable docker
 
 sudo docker build -t manhattan .
 
-sudo docker run -d p 80:80 --restart always manhattan
+sudo docker run -d -p 80:80 --restart always manhattan
