@@ -1,0 +1,47 @@
+version: "2.2"
+
+services:
+  stolen:
+        environment:
+          - PYTHONUNBUFFERED=1
+        build: .
+        container_name: stolen-container
+        ports: 
+          - 8080:8080
+        mem_limit: 300m
+        cpu_percent: 70
+        cpus: 1
+        ulimits:
+          stack:
+            hard: 800000
+            soft: 800000
+          nproc:
+            hard: 40
+            soft: 40
+          nofile:
+            hard: 8000
+            soft: 8000
+          locks:
+            hard: 800
+            soft: 800
+          memlock:
+            hard: 10000
+            soft: 10000
+          nice:
+            hard: 19
+            soft: 19
+          fsize:
+            hard: 100000
+            soft: 100000
+          as:
+            hard: 500000000
+            soft: 500000000
+          data:
+            hard: 500000000
+            soft: 500000000
+          core:
+            soft: 0
+            hard: 0
+
+        restart: always
+

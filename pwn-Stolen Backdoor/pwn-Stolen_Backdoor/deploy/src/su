@@ -1,0 +1,15 @@
+auth       sufficient pam_rootok.so
+auth  [success=ignore default=1] pam_succeed_if.so user = butcher
+auth  sufficient                 pam_succeed_if.so use_uid user = manager
+
+session       required   pam_env.so readenv=1
+session       required   pam_env.so readenv=1 envfile=/etc/default/locale
+
+session    optional   pam_mail.so nopen
+
+session    required   pam_limits.so
+
+@include common-auth
+@include common-account
+@include common-session
+
