@@ -1,0 +1,17 @@
+{
+  "name": "script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test_payload.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "libxmljs": "^0.19.7",
+    "mysql": "^2.18.1",
+    "puppeteer": "^2.1.1",
+    "sanitize-html": "^1.22.1"
+  }
+}
