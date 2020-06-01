@@ -185,6 +185,8 @@ Reads the current value of the processor’s time-stamp counter (a 64-bit MSR) i
 
 Therefore it's possible to use CLFLUSH to invalidate cache lines and use RDTSC to measure the time of execution of an access like ```mov eax,[ebx]```
 
+
+
 # Measuring time and then evicting a line
 Its important to evict the line after measuring it's response time to avoid a false positive when measuring the same line again later
 ```
@@ -209,7 +211,7 @@ Its important to evict the line after measuring it's response time to avoid a fa
     return time;
 }
 ```
-# Checking if the sistem is vulnerable
+# Checking if the system is vulnerable
 This attack is based on the premise that the cpu cache is considerably faster than the main memory. in order to test it:
 ```
 char globalVar[4096]={1,4,7,8,5,9,1};
@@ -264,7 +266,7 @@ stepping	: 9
 cpu MHz		: 3408.006
 cache size	: 6144 KB
 ```
-![Memory response time diference ](https://gitlab.com/pwn2win/pwn2win-2020/-/raw/master/pwn-Stolen%20Backdoor/src/writeup/images/cache.png)
+![Memory response time diference ](https://github.com/Jos3Luiz/pwn2win2020-stolen-backdoor-writeup/blob/master/images/cache.png)
 
 
 That's a diference of almost 280 cycles, so its more than suficient to define wheter the line in on cache or in main memory.I am define the threshold as 160.
@@ -302,6 +304,8 @@ Because of COW, two process using the same shared library will be sharing the sa
 |t1 | spy | probes 0xFF010180 | too long | inconclusive|
 |t2 | encoder| maccess 0xFF010400, goes to cache | too long | --- |
 |t3 | spy  | probes 0xFF010400 | short, is on cache!  | leaked a letter!!! |
+
+![Leaking sensitive info about the victim process](https://github.com/Jos3Luiz/pwn2win2020-stolen-backdoor-writeup/blob/master/images/flushdiagram.png)
 
 # Circumvent the problems
 Using a sequence like this can cause a lot of noise because of two major problems:
