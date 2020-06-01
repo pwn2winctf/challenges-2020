@@ -1,0 +1,42 @@
+version: '3'
+services:  
+
+  # Weaponlizer Application
+  watchers: 
+    build: # Build configuration
+      context: ./watchers
+      dockerfile: Dockerfile
+    ports:
+      # Expose container port to host
+      - "31337:80"
+    restart: unless-stopped
+    depends_on:
+      - ademir # This service depends on ademir, start it first
+    networks:
+      - backend
+
+  # Ademir Application
+  ademir:
+    build:
+      context: ./ademir
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment: # Pass environment variables to the service
+      PORT: 8080
+      FLAG: CTF-BR{stackoverflow.com/revisions/1732454/11}
+      INSTANCES: 10
+      USEWEBHOOK: "true"
+      DEBUG: "true"
+      STAY: 5
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: 172.29.0.0/24
+
+
+  
