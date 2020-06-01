@@ -1,0 +1,24 @@
+package Tb where
+import Dut
+
+{-# verilog mkTb #-}
+
+mkTb :: Module Empty
+mkTb =
+  module
+    dut  :: Dut
+    dut  <- mkDut LICENSE_KEY
+    char :: Reg (Bit 8)
+    char <- mkReg _
+    sz   :: Reg (Bit 3)
+    sz   <- mkReg 0
+
+    rules
+      when True ==>
+        let char_upd = (char << 1) | extend(dut.out)
+        in action {
+          char := char_upd ;
+          sz   := sz + 1 ;
+          if sz == 7 && char_upd /= 0 then $write "%c" char_upd else noAction ;
+          if sz == 7 && char_upd == 0 then action { $write "\n" ; $finish } else noAction ;
+        }
