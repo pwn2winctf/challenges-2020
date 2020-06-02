@@ -1,0 +1,18 @@
+Nome: Sound Maze 2.0
+descricao pt:
+
+Na Era da Ultraviolência as cidades são caóticas. Você chegou a uma delas: um local completamente escuro, em que para cada passo dado você recebe uma informação codificada. Será você capaz de superar esse obstáculo para continuar sua jornada rumo à vitória?
+
+autor: andre_smaira
+
+descricao en:
+
+In the ultraviolence era the cities are chaotic. You arrived in one of them: a completely dark place, in which for each step you receive an encrypted information. Will you be able to go trough this obstacle to continue your journey to the victory?
+
+author: andre_smaira
+
+flag: CTF-BR{i7_w4S_jUs7_a_S1mp13_BFS_guid3D_bY_b4S3_1G}
+porta: 31337
+ip: ?
+
+procedimento: mudar o IP no Dockerfile e executar o container
