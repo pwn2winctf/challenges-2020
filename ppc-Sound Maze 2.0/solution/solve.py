@@ -24,7 +24,7 @@ HASHES = {'052aee2948b3485bb5d12b231b508578146f16720e1c162f22408b55': WALL,
           'd14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f': VISITED,
           'b': BOOM}
 INF = 9999999999999999999999999999999999
-RESP = INF
+ANS = INF
 
 
 class Maze:
@@ -88,7 +88,7 @@ def sha224(f: bytes) -> str:
     return hashlib.sha224(b64).hexdigest()
 
 
-def dpos(pos: Tuple[int, int], c: bytes) -> Tuple[int, int]:
+def new_position(pos: Tuple[int, int], c: bytes) -> Tuple[int, int]:
     if c == b'A':
         return pos[0]-1, pos[1]
     if c == b'D':
@@ -116,7 +116,7 @@ def go(pos: Tuple[int, int], c: bytes) -> Tuple[Tuple[int, int], bytes]:
     try:
         send_line(c)
         cont = content()
-        npos = dpos(pos, c)
+        npos = new_position(pos, c)
         if cont == BOOM:
             sys.exit('BOOOOOOOOM')
         if cont in [EMPTY, END] or (cont == VISITED and m.get(npos) in [EMPTY, END]):
@@ -146,7 +146,7 @@ def dfs(v: tuple = (0, 0), d=0) -> None:
             visited.add(v)
         for c in b'ADSW':
             c = bytes([c])
-            if dpos(v, c) in visited:
+            if new_position(v, c) in visited:
                 continue
             pos, ev = go(v, c)
             if pos != v:
@@ -156,8 +156,8 @@ def dfs(v: tuple = (0, 0), d=0) -> None:
                 dfs(v, d+1)
                 v, ev = go(v, op[c])
             else: 
-                m.set(dpos(pos, c), WALL)
-                visited.add(dpos(pos, c))
+                m.set(new_position(pos, c), WALL)
+                visited.add(new_position(pos, c))
     except Exception as err2:
         print(f'dfs() - {err2}')
 
@@ -172,7 +172,7 @@ def bfs(ini: tuple = (0, 0)) -> int:
         v = fila.get()
         for c in b'ADSW':
             c = bytes([c])
-            w = dpos(v, c)  
+            w = new_position(v, c)  
             if w not in m:
                 continue
             if m.get_d(w) == INF:   
@@ -198,9 +198,9 @@ while True:
             break
         visited = set()
         dfs()
-        RESP = bfs()
-        send_line(f'ANS {RESP}')
-        print(f'ANS {RESP} {m.d_end}')
+        ANS = bfs()
+        send_line(f'ANS {ANS}')
+        print(f'ANS {ANS} {m.d_end}')
         t2 = dt2.now()
         print(t2-t1)
     except Exception as err:
