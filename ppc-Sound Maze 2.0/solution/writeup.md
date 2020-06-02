@@ -68,7 +68,7 @@ It uses other created classes, functions and variables that represents the follo
 - `m.set(pos, ev)`: Mark the position `pos` content (`ev`) in maze `m`
 - `op[c]`: Dict that indicates the key of opposite direction 
 
-The `dfs` function walks around all the maze, creating all the map. After that, we have to run al minimum path algorithm to find the answer. As it is a not weighted graph, a simple [breadth-first search (BFS) algorithm](https://en.wikipedia.org/wiki/Breadth-first_search) is enough to geto to answer:
+The `dfs` function walks around all the maze, creating all the map. After that, we have to run a minimum path algorithm to find the answer. As it is a not weighted graph, a simple [breadth-first search (BFS) algorithm](https://en.wikipedia.org/wiki/Breadth-first_search) is enough to geto to answer:
 
 ```python3
 def bfs(ini: tuple = (0, 0)) -> int:
