@@ -14,5 +14,3 @@ author: andre_smaira
 flag: CTF-BR{i7_w4S_jUs7_a_S1mp13_BFS_guid3D_bY_b4S3_1G}
 porta: 31337
 ip: ?
-
-procedimento: mudar o IP no Dockerfile e executar o container
