@@ -105,7 +105,7 @@ def content() -> bytes:
         sha = sha224(cont)
         if sha in HASHES:
             return HASHES[sha]
-        open('../deploy/test.mp3', 'wb').write(base64.b64decode(cont))
+        open('test.mp3', 'wb').write(base64.b64decode(cont))
         print(f'Unknown file!\n{sha}')
         sys.exit(f'Unknown file!\n{sha}')
     except Exception as contentErr:
