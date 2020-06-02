@@ -15,8 +15,8 @@ So you have a maze, but no information about its structure other than you can mo
 At first you have to explore the maze. If we move to any of directions, the server send a giant base 64 message. If you decode it, you will get a mp3 binary. Opening it, you will hear an information about the current position, that is one of the following:
 
 - "Welcome to this maze position. Nothing here" - Indicates you are in an empty place.
-- "You cannot come here, this is an wall" - Indicates that will not moved and there is an wall in the place you tried to go.
-- "You can't come here, there is a bomb! Be careful: do not try to come here again" - Indicates that will not moved and there is a bomb in the place you tried to go.
+- "You cannot come here, this is an wall" - Indicates that will not move and there is an wall in the place you tried to go.
+- "You can't come here, there is a bomb! Be careful: do not try to come here again" - Indicates that will not move and there is a bomb in the place you tried to go.
 - "beep beep (...) beep beep BOOM" - Bomb exploded. You lose. Try again
 - "Congratulations! You have reached the end" - Indicates you reach to the maze objective. Now you can send the answer.
 - "" - You do not need information, because you have already been here.
