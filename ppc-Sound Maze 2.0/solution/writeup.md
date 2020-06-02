@@ -15,8 +15,8 @@ So you have a maze, but no information about its structure other than you can mo
 At first you have to explore the maze. If we move to any of directions, the server send a giant base 64 message. If you decode it, you will get a mp3 binary. Opening it, you will hear an information about the current position, that is one of the following:
 
 - "Welcome to this maze position. Nothing here" - Indicates you are in an empty place.
-- "You cannot come here, this is an wall" - Indicates that will not move and there is an wall in the place you tried to go.
-- "You can't come here, there is a bomb! Be careful: do not try to come here again" - Indicates that will not move and there is a bomb in the place you tried to go.
+- "You cannot come here, this is an wall" - Indicates that will not moved and there is an wall in the place you tried to go.
+- "You can't come here, there is a bomb! Be careful: do not try to come here again" - Indicates that will not moved and there is a bomb in the place you tried to go.
 - "beep beep (...) beep beep BOOM" - Bomb exploded. You lose. Try again
 - "Congratulations! You have reached the end" - Indicates you reach to the maze objective. Now you can send the answer.
 - "" - You do not need information, because you have already been here.
@@ -26,25 +26,29 @@ So based in these information we have to explore the unknown maze.
 In graph theory the operation to do this is the [depth-first search (DFS)](https://en.wikipedia.org/wiki/Depth-first_search). In our case we have to walk trough the maze to explore it, so for each move we have to be at a neighbor place, that is, when finish to explore a place neighbors, we have to return to previous place. Parallel to this process we have to draw the map. The following python3 function implements the algorithm:
 
 ```python3
-def dfs(v: tuple = (0, 0)) -> None:
+def dfs(v: tuple = (0, 0), d=0) -> None:
     global m
     try:
         if m.isend((0, 0)):
+            m.d_end = 1
             return
-        if v in visited: 
+        if m.isend(v):
+            m.d_end = d+2
             return
-        if v != (0, 0): 
+        if v in visited or d > m.d_end:
+            return
+        if v != (0, 0):
             visited.add(v)
         for c in b'ADSW':
             c = bytes([c])
-            if new_position(v, c) in visited: 
+            if new_position(v, c) in visited:
                 continue
             pos, ev = go(v, c)
             if pos != v:
                 if ev != VISITED:
                     m.set(pos, ev)
                 v = pos
-                dfs(v)
+                dfs(v, d+1)
                 v, ev = go(v, op[c])
             else: 
                 m.set(new_position(pos, c), WALL)
@@ -98,7 +102,7 @@ def content() -> bytes:
         sha = sha224(cont)
         if sha in HASHES:
             return HASHES[sha]
-        open('test.mp3', 'wb').write(base64.b64decode(cont))
+        open('../deploy/test.mp3', 'wb').write(base64.b64decode(cont))
         print(f'Unknown file!\n{sha}')
         sys.exit(f'Unknown file!\n{sha}')
     except Exception as contentErr:
