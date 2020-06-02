@@ -13,12 +13,12 @@ from queue import Queue
 from secrets import FLAG
 
 
-class timeout(Exception):
+class TimeOut(Exception):
     pass
 
 
 def alarm_handler(signum, frame):
-    raise timeout()
+    raise TimeOut()
 
 
 signal.signal(signal.SIGALRM, alarm_handler)
@@ -34,7 +34,7 @@ FILES = {'#': 'wall.mp3', '.': 'ok.mp3', '*': 'bomb.mp3', '0': 'boom.mp3', 'F': 
 TIMEOUTS = [10, 10, 20, 20, 90, 500, 500, 600, 30, 10]
 
 
-def adjacencia(v, n, m):
+def adjacence(v, n, m):
     adj = []
     if v[0] > 1:
         adj += [(v[0] - 1, v[1])]
@@ -47,33 +47,33 @@ def adjacencia(v, n, m):
     return adj
 
 
-def isend(tab, pos):
-    return tab[pos[0]][pos[1]] == 'F'
+def is_end(maze_map, pos):
+    return maze_map[pos[0]][pos[1]] == 'F'
 
 
-def bfs(tab, ini):
-    if isend(tab, ini):
+def bfs(maze_map, ini):
+    if is_end(maze_map, ini):
         return 0
-    fila = Queue()
-    fila.put(ini)
-    n = len(tab)
-    m = len(tab[0])
+    q = Queue()
+    q.put(ini)
+    n = len(maze_map)
+    m = len(maze_map[0])
     dist = np.array(n * [m * [-1]])
     dist[ini[0]][ini[1]] = 0
-    while not fila.empty():
-        v = fila.get()
-        adj = adjacencia(v, n, m)
+    while not q.empty():
+        v = q.get()
+        adj = adjacence(v, n, m)
         for w in adj:
             if dist[w[0]][w[1]] == -1:
                 dist[w[0]][w[1]] = dist[v[0]][v[1]] + 1
-                if isend(tab, w):
+                if is_end(maze_map, w):
                     return dist[w[0]][w[1]]
-                if tab[w[0]][w[1]] == '.':
-                    fila.put(w)
+                if maze_map[w[0]][w[1]] == '.':
+                    q.put(w)
     return -1
 
 
-# print('Labirinto...')
+# print('Maze...')
 mazes = [
     (['####',
       '#.F#',
@@ -2118,35 +2118,30 @@ def maze(n=None):
     return list(mazes[n][0]), mazes[n][1]
 
 
-def verify(m, pos):
-    if m[pos[0]][pos[1]] == '#':
-        return False
-
-
-def conteudo(f: str) -> str:
+def content(f: str) -> str:
     return str(base64.b64encode(open(f, 'rb').read()).strip(), encoding='utf8')
 
 
-def manipulador():
+def main():
     print('You are in a maze! Find the lenght of smallest path to the end! If there is no path, the answer must be -1')
     print('Use the keys ASDW to move throw. For each move send one of these letters.')
     print('At any time, send "ANS x", where x is the answer to the problem.')
     for i in range(maze()):
         print(f'ROUND {i+1}/{maze()}')
-        m, ini = maze(i)
-        resultado = bfs(m, ini)
-        ja = set()
-        finalizado = isend(m, ini)
+        m, beg = maze(i)
+        ans = bfs(m, beg)
+        visited = set()
+        ended = is_end(m, beg)
         signal.alarm(TIMEOUTS[i])
         t0 = time.time()
         try:
             while True:
-                resposta = input().strip()
-                if 'ANS' in resposta:
+                player_ans = input().strip()
+                if 'ANS' in player_ans:
                     signal.alarm(0)
-                    if finalizado or resultado == -1:
-                        x = int(resposta.split('ANS')[1].strip())
-                        if x == resultado:
+                    if ended or ans == -1:
+                        x = int(player_ans.split('ANS')[1].strip())
+                        if x == ans:
                             if i + 1 < maze():
                                 print('Congratulations! You are going to next level!')
                             break
@@ -2157,37 +2152,37 @@ def manipulador():
                         print('You did not get to maze end!')
                     continue
 
-                if resposta == 'A':
-                    pos = (ini[0], ini[1] - 1)
-                elif resposta == 'D':
-                    pos = (ini[0], ini[1] + 1)
-                elif resposta == 'S':
-                    pos = (ini[0] + 1, ini[1])
-                elif resposta == 'W':
-                    pos = (ini[0] - 1, ini[1])
+                if player_ans == 'A':
+                    pos = (beg[0], beg[1] - 1)
+                elif player_ans == 'D':
+                    pos = (beg[0], beg[1] + 1)
+                elif player_ans == 'S':
+                    pos = (beg[0] + 1, beg[1])
+                elif player_ans == 'W':
+                    pos = (beg[0] - 1, beg[1])
                 else:
                     print('Unknown command! Good bye!')
                     return
 
                 fn = FILES[m[pos[0]][pos[1]]]
-                if pos not in ja or fn == 'boom.mp3':
-                    print(conteudo(fn) + '=\n\n\n')
+                if pos not in visited or fn == 'boom.mp3':
+                    print(content(fn) + '=\n\n\n')
                 else:
                     print('=\n\n\n')
-                ja.add(pos)
-                if isend(m, pos):
-                    finalizado = True
+                visited.add(pos)
+                if is_end(m, pos):
+                    ended = True
                 if fn in ['ok.mp3', 'end.mp3']:
-                    ini = pos
+                    beg = pos
                 elif fn == 'bomb.mp3':
                     m[pos[0]] = m[pos[0]][:pos[1]] + '0' + m[pos[0]][pos[1] + 1:]
                 elif fn == 'boom.mp3':
                     print('Try harder!')
                     return
                 if time.time() > t0 + TIMEOUTS[i]:
-                    raise timeout
+                    raise TimeOut
 
-        except timeout:
+        except TimeOut:
             print('Timeout!')
             return
 
@@ -2195,4 +2190,4 @@ def manipulador():
 
 
 if __name__ == '__main__':
-    manipulador()
+    main()
