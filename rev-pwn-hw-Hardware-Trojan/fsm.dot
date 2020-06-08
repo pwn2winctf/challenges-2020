@@ -1,0 +1,20 @@
+digraph finite_state_machine {
+	//rankdir=LR;
+	size="8,5"
+	node [shape = circle];
+	0 -> 0 [ label = "!trig_pc_is_valid_pc && !trigA" ];
+	0 -> 1 [ label = "!trig_pc_is_valid_pc && trigA" ];
+	0 -> 4 [ label = "trig_pc_is_valid_pc" ];
+	1 -> 0 [ label = "!trig_pc_is_valid_pc && !trigA && !trigB" ];
+	1 -> 1 [ label = "!trig_pc_is_valid_pc && trigA && !trigB" ];
+	1 -> 2 [ label = "!trig_pc_is_valid_pc && !trigA && trigB" ];
+	1 -> 4 [ label = "trig_pc_is_valid_pc" ];
+	2 -> 2 [ label = "!trig_pc_is_valid_pc && trigB" ];
+	2 -> 3 [ label = "!trig_pc_is_valid_pc && !trigB" ];
+	2 -> 4 [ label = "trig_pc_is_valid_pc" ];
+	3 -> 0 [ label = "!trig_pc_is_valid_pc && jalr_and_count_zero" ];
+	3 -> 3 [ label = "!trig_pc_is_valid_pc && !jalr_and_count_zero" ];
+	3 -> 4 [ label = "trig_pc_is_valid_pc" ];
+	4 -> 0 [ label = "mem_ctrl_branch" ];
+	4 -> 4 [ label = "!mem_ctrl_branch" ];
+}
