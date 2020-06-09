@@ -46,7 +46,7 @@ To get a baseline for our work, we can build a [clean version](without_trojan.v)
 
 Anyway, you should really take a moment to study the Rocket core and try to think where someone could insert a trojan behaving as described in the problem statement. It must have access to data being written to the data cache. It must also have a means to change control flow.
 
-Well, control flow (and most of the core logic) is implemented at the [RocketCore.scala](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala) file. Connection with the data cache happens at [line 687](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala#L687). Let's try to locate this stuff at the netlist.
+Well, control flow (and most of the core logic) is implemented in the [RocketCore.scala](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala) file. Connection with the data cache happens at [line 687](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala#L687). Let's try to locate this stuff in the netlist.
 
 The netlist code is not so hard to comprehend, as we shall see, but it can be really overwhelming to navigate through it. You should take some notes and draw diagrams to help you locate yourself. Since nets in different modules may have the same or very similar names, a trick that helps a lot is to split different modules into separate files, *e.g.*:
 
