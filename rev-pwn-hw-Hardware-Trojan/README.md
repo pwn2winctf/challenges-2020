@@ -180,7 +180,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
  * [`\trig_pc_reg[0]_1 `](Rocket.v#L10997-L11006) → [`jalr_and_count_zero`](r/Rocket.v#L10997-L11006): `mem_ctrl_jalr && trig_jalr_count == 0`.
  * [`\trig_pc_reg[0]_0 `](Rocket.v#L20625) → [`trig_pc_valid_curr`](r/Rocket.v#L20625): current value of `trig_pc_valid` register.
  * [`\trig_pc_reg[63]_0 `](Rocket.v#L20107-L20618) → [`trig_pc_curr`](r/Rocket.v#L20107-L20618): current value of `trig_pc` register.
- * [`\trig_pc_reg[63]_1 ` *aka* `_T_1944`](RocketTile.v#L5517) → [`trig_pc_is_pc`](r/RocketTile.v#L5517): `trig_pc_curr` is equal to the current value of the `mem_reg_pc` register.
+ * [`\trig_pc_reg[63]_1 ` *aka* `_T_1944`](RocketTile.v#L7358-L7363) → [`trig_pc_is_pc`](r/RocketTile.v#L7358-L7363): `trig_pc_curr` is equal to the current value of the `mem_reg_pc` register.
  * [`\trig_state_reg[1]_2 `](Rocket.v#L12789-L12794) → [`trig_pc_is_valid_pc`](r/Rocket.v#L12789-L12794): `trig_pc_valid_curr && trig_pc_is_pc`.
  * [`\trig_mem_data_reg[63]_0 `](RocketTile.v#L5507) → [`trigA`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) first 64 bits of the trigger sequence.
  * [`\trig_mem_data_reg[127]_0 `](RocketTile.v#L5507) → [`trigB`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) last 64 bits of the trigger sequence.
@@ -192,7 +192,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
         (curr_state == 2) ? (!trigB) :
         0)
    ```
- * [`trig_pc_valid_reg_2` *aka* `core__266_n_0`](RocketTile.v#L5520) → [`pc_or_jalr_or_not3`](r/RocketTile.v#L5520): Here it is easier to look for the conditions for it to be false: `!(!trig_pc_is_valid_pc && !jalr_and_count_zero && state==3)` == `trig_pc_is_valid_pc || jalr_and_count_zero || state != 3`.
+ * [`trig_pc_valid_reg_2` *aka* `core__266_n_0`](RocketTile.v#L7348-L7357) → [`pc_or_jalr_or_not3`](r/RocketTile.v#L7348-L7357): Here it is easier to look for the conditions for it to be false: `!(!trig_pc_is_valid_pc && !jalr_and_count_zero && state==3)` == `trig_pc_is_valid_pc || jalr_and_count_zero || state != 3`.
  * [`\trig_state[0]_i_2_n_0 `](Rocket.v#L20637-L20646) → [`big_expr_02`](r/Rocket.v#L20637-L20646):
    ```
    (curr_state == 0) ? (trigA) :
