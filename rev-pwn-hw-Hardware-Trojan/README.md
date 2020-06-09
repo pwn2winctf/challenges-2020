@@ -176,15 +176,15 @@ The current state of the trojan state machine is encoded in a [3-bit register](r
 
 We now analyze the combinational logic that computes the next state of the FSM, trying to make sense of each intermediary net:
 
- * [`\trig_state[0]_i_4_n_0 `](r/Rocket.v#L20657-L20663) → `curr_state_is_zero`: `curr_state == 0`.
- * [`\trig_pc_reg[0]_1 `](r/Rocket.v#L10997-L11006) → `jalr_and_count_zero`: `mem_ctrl_jalr && trig_jalr_count == 0`.
- * [`\trig_pc_reg[0]_0 `](r/Rocket.v#L20625) → `trig_pc_valid_curr`: current value of `trig_pc_valid` register.
- * [`\trig_pc_reg[63]_0 `](r/Rocket.v#L20107-L20618) → `trig_pc_curr`: current value of `trig_pc` register.
- * [`\trig_pc_reg[63]_1 ` *aka* `_T_1944`](r/RocketTile.v#L5517) → `trig_pc_is_pc`: `trig_pc_curr` is equal to the current value of the `mem_reg_pc` register.
- * [`\trig_state_reg[1]_2 `](r/Rocket.v#L12789-L12794) → `trig_pc_is_valid_pc`: `trig_pc_valid_curr && trig_pc_is_pc`.
- * [`\trig_mem_data_reg[63]_0 `](r/RocketTile.v#L5507) → `trigA`: word written to data cache [matches](#constructing-a-bigger-comparator) first 64 bits of the trigger sequence.
- * [`\trig_mem_data_reg[127]_0 `](r/RocketTile.v#L5507) → `trigB`: word written to data cache [matches](#constructing-a-bigger-comparator) last 64 bits of the trigger sequence.
- * [`trig_state`](r/Rocket.v#L20656) → `big_expr_01`: It helps if you write a different boolean expression for each state:
+ * [`\trig_state[0]_i_4_n_0 `](Rocket.v#L20657-L20663) → [`curr_state_is_zero`](r/Rocket.v#L20657-L20663): `curr_state == 0`.
+ * [`\trig_pc_reg[0]_1 `](Rocket.v#L10997-L11006) → [`jalr_and_count_zero`](r/Rocket.v#L10997-L11006): `mem_ctrl_jalr && trig_jalr_count == 0`.
+ * [`\trig_pc_reg[0]_0 `](Rocket.v#L20625) → [`trig_pc_valid_curr`](r/Rocket.v#L20625): current value of `trig_pc_valid` register.
+ * [`\trig_pc_reg[63]_0 `](Rocket.v#L20107-L20618) → [`trig_pc_curr`](r/Rocket.v#L20107-L20618): current value of `trig_pc` register.
+ * [`\trig_pc_reg[63]_1 ` *aka* `_T_1944`](RocketTile.v#L5517) → [`trig_pc_is_pc`](r/RocketTile.v#L5517): `trig_pc_curr` is equal to the current value of the `mem_reg_pc` register.
+ * [`\trig_state_reg[1]_2 `](Rocket.v#L12789-L12794) → [`trig_pc_is_valid_pc`](r/Rocket.v#L12789-L12794): `trig_pc_valid_curr && trig_pc_is_pc`.
+ * [`\trig_mem_data_reg[63]_0 `](RocketTile.v#L5507) → [`trigA`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) first 64 bits of the trigger sequence.
+ * [`\trig_mem_data_reg[127]_0 `](RocketTile.v#L5507) → [`trigB`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) last 64 bits of the trigger sequence.
+ * [`trig_state`](Rocket.v#L20656) → [`big_expr_01`](r/Rocket.v#L20656): It helps if you write a different boolean expression for each state:
    ```
    !trig_pc_is_valid_pc && (
         (curr_state == 0) ? (1) :
@@ -192,8 +192,8 @@ We now analyze the combinational logic that computes the next state of the FSM, 
         (curr_state == 2) ? (!trigB) :
         0)
    ```
- * [`trig_pc_valid_reg_2` *aka* `core__266_n_0`](r/RocketTile.v#L5520) → `pc_or_jalr_or_not3`: Here it is easier to look for the conditions for it to be false: `!(!trig_pc_is_valid_pc && !jalr_and_count_zero && state==3)` == `trig_pc_is_valid_pc || jalr_and_count_zero || state != 3`.
- * [`\trig_state[0]_i_2_n_0 `](r/Rocket.v#L20637-L20646) → `big_expr_02`:
+ * [`trig_pc_valid_reg_2` *aka* `core__266_n_0`](RocketTile.v#L5520) → [`pc_or_jalr_or_not3`](r/RocketTile.v#L5520): Here it is easier to look for the conditions for it to be false: `!(!trig_pc_is_valid_pc && !jalr_and_count_zero && state==3)` == `trig_pc_is_valid_pc || jalr_and_count_zero || state != 3`.
+ * [`\trig_state[0]_i_2_n_0 `](Rocket.v#L20637-L20646) → [`big_expr_02`](r/Rocket.v#L20637-L20646):
    ```
    (curr_state == 0) ? (trigA) :
    (curr_state == 1) ? (1) :
@@ -202,7 +202,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
    (curr_state == 4) ? (pc_or_jalr_or_not3 && mem_ctrl_branch) :
    0
    ```
- * [`\trig_state[1]_i_4_n_0 `](r/Rocket.v#L20864-L20873) → `big_expr_03`:
+ * [`\trig_state[1]_i_4_n_0 `](Rocket.v#L20864-L20873) → [`big_expr_03`](r/Rocket.v#L20864-L20873):
    ```
    (curr_state == 1) ? (1) :
    (curr_state == 2) ? (1) :
@@ -210,7 +210,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
    (curr_state == 4) ? (mem_ctrl_branch) :
    0
    ```
- * [`\trig_state[1]_i_2_n_0 `](r/Rocket.v#L20754-L20763) → `big_expr_04`:
+ * [`\trig_state[1]_i_2_n_0 `](Rocket.v#L20754-L20763) → [`big_expr_04`](r/Rocket.v#L20754-L20763):
    ```
    (curr_state == 1) ? (big_expr_03 && trigB && !trig_pc_is_valid_pc) :
    (curr_state == 2) ? (!big_expr_03 || !trig_pc_is_valid_pc) :
@@ -219,19 +219,19 @@ We now analyze the combinational logic that computes the next state of the FSM, 
    (curr_state == 7) ? (!big_expr_03) :
    0
    ```
- * [`\trig_state[0]_i_1_n_0 `](r/Rocket.v#L20627-L20636) → `next_state_0`:
+ * [`\trig_state[0]_i_1_n_0 `](Rocket.v#L20627-L20636) → [`next_state_0`](r/Rocket.v#L20627-L20636):
    ```
    !target_reset && (!trig_pc_is_valid_pc || !curr_state_is_zero) &&
        (big_expr_01 ? ( big_expr_02 || curr_state_0) :
                       (!big_expr_02 && curr_state_0)))
    ```
- * [`\trig_state[1]_i_1_n_0 `](r/Rocket.v#L20664-L20673) → `next_state_1`:
+ * [`\trig_state[1]_i_1_n_0 `](Rocket.v#L20664-L20673) → [`next_state_1`](r/Rocket.v#L20664-L20673):
    ```
    !target_reset && big_expr_04 && (
        (state == 0 || state == 1) ? (!trig_pc_is_valid_pc && !trigA) :
        1)
    ```
- * [`mem_ctrl_branch_reg_0` *aka* `core__710_n_0`](r/RocketTile.v#L11635-L11643) → `next_state_2`:
+ * [`mem_ctrl_branch_reg_0` *aka* `core__710_n_0`](RocketTile.v#L11635-L11643) → [`next_state_2`](r/RocketTile.v#L11635-L11643):
    ```
    (curr_state == 0) ? trig_pc_is_valid_pc :
    (curr_state == 1) ? trig_pc_is_valid_pc :
