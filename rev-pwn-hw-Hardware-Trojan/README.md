@@ -331,7 +331,7 @@ Therefore, the FSM has 5 states. As [we might already expect](#constructing-a-bi
    ```
    However, you may notice not all bits of `dcacheArb_io_requestor_1_s1_data_data` (let's call it `word`, for simplicity) end being used in `trig_pc`. You may run [this script](trig_pc.py) to realize that (when `curr_state == 2`) `trig_pc` gets updated with `{{4{word[52]}}, word[60:56], word[52:48], word[44:40], word[36:32], word[28:24], word[20:16], word[12:8]}`. Our reason (as the creators of the trojan) to ignore some bits was to allow the string to be completely printable (for your convenience).
 
-   You may find it funny the MSBs are being set to `word[52]`. It was actually a mistake we made when changing the logic so that it would not be identical to the challenge from [Pwn2Win CTF 2019](https://pwn2.win/2019/#/challenges). It would make more sense if we were setting the MSBs to `word[60]` (so that we would be sign-extending the value). This little mistake will not hinder us from exploiting Dropbear, which is the goal of this challenge. But beware if you want to deploy this trojan in production!
+   You may find it funny the MSBs are being set to `word[52]`. It was actually a [mistake](rocket-chip.diff#L63) we made when changing the logic so that it would not be identical to the challenge from [Pwn2Win CTF 2019](https://pwn2.win/2019/#/challenges). It would make more sense if we were setting the MSBs to `word[60]` (so that we would be sign-extending the value). This little mistake will not hinder us from exploiting Dropbear, which is the goal of this challenge. But beware if you want to deploy this trojan in production!
 
 
 ## Putting it all together
