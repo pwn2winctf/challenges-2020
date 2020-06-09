@@ -26,6 +26,9 @@ After you solved for Part 1, we found a Rocket RISC-V system at `iot.pwn2.win`. 
 
  * [dropbear](dropbear) (originally we gave the entire rootfs, but you only really need the dropbear binary)
 
+![Zybo Z7-20 at the data center](photo.jpg)
+*The challenge was running on **real** hardware*
+
 
 # Introduction
 
