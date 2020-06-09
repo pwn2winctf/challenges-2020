@@ -253,9 +253,9 @@ Now we replace `curr_state` in the expressions above to map the conditions for e
    * `next_state_1 = 0`
    * `next_state_2 = trig_pc_is_valid_pc`
    * Possible transitions:
-     * `0 -> 0` if `!trig_pc_is_valid_pc && !trigA`
-     * `0 -> 1` if `!trig_pc_is_valid_pc && trigA`
-     * `0 -> 4` if `trig_pc_is_valid_pc`
+     * `0 -> 0`: `!trig_pc_is_valid_pc && !trigA`
+     * `0 -> 1`: `!trig_pc_is_valid_pc && trigA`
+     * `0 -> 4`: `trig_pc_is_valid_pc`
  * `curr_state = 1`:
    * `big_expr_01 = !trig_pc_is_valid_pc && trigA`
    * `big_expr_02 = 1`
