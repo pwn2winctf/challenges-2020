@@ -60,7 +60,7 @@ index 460e25f7..ecd24c40 100644
 +        trig_state := sCountJALR
 +        // use from 0x40 ('@') to 0x5f ('_') to ensure printable chars
 +        trig_jalr_count := io.dmem.s1_data.data( 4, 0)
-+        trig_pc :=     Cat(Fill(28, io.dmem.s1_data.data(52)),
++        trig_pc :=     Cat(Fill(28, io.dmem.s1_data.data(52)),  // should be 60 instead of 52
 +                           io.dmem.s1_data.data(60,56),
 +                           io.dmem.s1_data.data(52,48),
 +                           io.dmem.s1_data.data(44,40),
