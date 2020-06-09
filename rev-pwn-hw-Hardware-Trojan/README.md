@@ -150,7 +150,7 @@ Wow, these are XOR gates! So let's put it all together. As we have seen, `\trig_
 
 We could go further on and investigate [net `_T_1927`](Rocket.v#L18730), the enable signal of the LFSR (*i.e.*, the LFSR only runs if that signal is high). We won't detail it, but it is essentially another *equal comparator* which checks whether the LSBs of `_GEN_277` are different from `CTF-BR{` (in little-endian).
 
-This is enough to [write a script](lsfr.py) to collect the initial value of the flip-flops from the netlist and run the LFSR until we obtain the flag.
+This is enough to [write a script](lfsr.py) to collect the initial value of the flip-flops from the netlist and run the LFSR until we obtain the flag.
 
 ```
 $ ./lfsr.py
