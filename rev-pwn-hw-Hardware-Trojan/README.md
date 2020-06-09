@@ -184,7 +184,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
  * [`\trig_state_reg[1]_2 `](Rocket.v#L12789-L12794) → [`trig_pc_is_valid_pc`](r/Rocket.v#L12789-L12794): `trig_pc_valid_curr && trig_pc_is_pc`.
  * [`\trig_mem_data_reg[63]_0 `](RocketTile.v#L5507) → [`trigA`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) first 64 bits of the trigger sequence.
  * [`\trig_mem_data_reg[127]_0 `](RocketTile.v#L5507) → [`trigB`](r/RocketTile.v#L5507): word written to data cache [matches](#constructing-a-bigger-comparator) last 64 bits of the trigger sequence.
- * [`trig_state`](Rocket.v#L20656) → [`big_expr_01`](r/Rocket.v#L20656): It helps if you write a different boolean expression for each state:
+ * [`trig_state`](Rocket.v#L20647-L20656) → [`big_expr_01`](r/Rocket.v#L20647-L20656): It helps if you write a different boolean expression for each state:
    ```
    !trig_pc_is_valid_pc && (
         (curr_state == 0) ? (1) :
