@@ -29,16 +29,16 @@ After you solved for Part 1, we found a Rocket RISC-V system at `iot.pwn2.win`. 
 
 # Introduction
 
-Hardware reversing is hard. There is a huge lack of (public) tools. You must be prepared to spend lots of time doing manual analysis and to roll your own tooling if needed. Let's get our hands dirty!
+Hardware reversing is hard. There is a huge lack of (public) tools. You must be prepared to spend lots of time with manual analysis and to roll your own tooling if needed. Let's get our hands dirty!
 
 ## A note about notation
 
-Netlists use a very confusing notation. Many signals are prefixed with `\` and end with a mandatory whitespace. That is some kind of escape which allows the name of the net to contain special chars. For instance, `\name[50] ` is not the 51th bit of `name` – it is just a net named `\name[50] `. You can even end up with weird things such as `\name[50] [4]`, which means the 5th bit (from LSB to MSB) of the `\name[50] ` net.
+Netlists use a very confusing notation. Many signals are prefixed with `\` and end with mandatory whitespace. That is some kind of escape that allows the name of the net to contain special chars. For instance, `\name[50] ` is not the 51th bit of `name` – it is just a net named `\name[50] `. You can even end up with weird things such as `\name[50] [4]`, which means the 5th bit (from LSB to MSB) of the `\name[50] ` net.
 
 
 # Locating the trojan
 
-In a more realistic setting, we would probably need something like [VeriTrust](https://www.cse.cuhk.edu.hk/~qxu/zhang-dac13.pdf) or [ANGEL](https://eprint.iacr.org/2017/783.pdf), but neither of these tools seem to be publicly available (if you have a copy, please share!)
+In a more realistic setting, we would probably need something like [VeriTrust](https://www.cse.cuhk.edu.hk/~qxu/zhang-dac13.pdf) or [ANGEL](https://eprint.iacr.org/2017/783.pdf), but neither of these tools seems to be publicly available (if you have a copy, please share!)
 
 However, we are quite lucky, since this challenge's netlist is not obfuscated.
 
@@ -48,7 +48,7 @@ Anyway, you should really take a moment to study the Rocket core and try to thin
 
 Well, control flow (and most of the core logic) is implemented at the [RocketCore.scala](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala) file. Connection with the data cache happens at [line 687](https://github.com/rf-hw-team/rocket-chip/blob/master/src/main/scala/rocket/RocketCore.scala#L687). Let's try to locate this stuff at the netlist.
 
-The netlist code is not so hard to comprehend, as we shall see, but it can be really overwhelming to navigate through it. You should take some notes and draw diagrams to help you locate yourself. Since nets in different modules may have the same or very similar names, a trick that helps a lot is to split different modules in different files, *e.g.*:
+The netlist code is not so hard to comprehend, as we shall see, but it can be really overwhelming to navigate through it. You should take some notes and draw diagrams to help you locate yourself. Since nets in different modules may have the same or very similar names, a trick that helps a lot is to split different modules into separate files, *e.g.*:
 
 ```bash
 grep -Pzo '(?s)module Rocket\n.*?endmodule' with_trojan.v > Rocket.v
@@ -64,15 +64,15 @@ Let's continue to follow this signal. Inside the Rocket module, `\a_data_reg[63]
 
 # The trigger string
 
-If you were solving the first version of this challenge (from [Pwn2Win CTF 2019](https://pwn2.win/2019/#/challenges)), you would have probably almost retrieved the flag for Part 1 by now. In the previous version, the `\a_data_reg[63] ` signal we have just located would be compared to a pair of 64 bit constants, so you would only need to recover these constants (of course, these would be scattered across a number of LUTs). This was actually solved by a former member of dcua who is now playing with perfect blue (sorry, I don't remember your nickname, please contact me so that I can update this write-up.) However, things in this version of the challenge are a little different.
+If you were solving the first version of this challenge (from [Pwn2Win CTF 2019](https://pwn2.win/2019/#/challenges)), you would probably have almost retrieved the flag for Part 1 by now. In the previous version, the `\a_data_reg[63] ` signal we have just located would be compared to a pair of 64-bit constants, so you would only need to recover these constants (of course, these would be scattered across several LUTs). This was actually solved by a former member of dcua who is now playing with perfect blue (sorry, I don't remember your nickname, please contact me so that I can update this write-up.) However, things in this version of the challenge are a little different.
 
 So let's continue to analyze how the `\a_data_reg[63] ` signal is used. [This group](Rocket.v#L19897-L20106) and [this other group](Rocket.v#L20674-L20903) of LUTs have a very magical constant as their `.INIT` parameter: `64'h9009000000009009`. To understand why this constant is magical, we need to explain what a LUT is.
 
 ## LUTs
 
-LUT is just an abbreviation for *look-up table*. It is just a table on which you can look for the value of the inputs and see which output is associated with them. If you studied digital logic, you might have called this a [truth table](https://en.wikipedia.org/wiki/Truth_table).
+LUT is just an abbreviation for *look-up table*. It is just a table on which you can look for the inputs' value and see which output is associated with them. If you studied digital logic, you might have called this a [truth table](https://en.wikipedia.org/wiki/Truth_table).
 
-If you have 6 inputs, you can represent this table as a `2**6` == 64 bit value. Each bit of the value represents the output for a given set of inputs.
+If you have 6 inputs, you can represent this table as a `2**6` == 64-bit value. Each bit of the value represents the output for a given set of inputs.
 
 We wrote a [small tool](lut.py) that receives the value of the `.INIT` parameter and the desired output (0 or 1), then lists every set of inputs that produces the desired output.
 
@@ -122,11 +122,11 @@ To compare more than 4 bits, we would just need to combine the `\trig_jalr_count
         .S({core_n_1485,core_n_1486,core_n_1487,core_n_1488}));
 ```
 
-Of course you can try to understand what a `CARRY4` does by looking at the [Verilog description of cells](https://github.com/YosysHQ/yosys/blob/a7f2ef6d34c4b336a910b3c6f3d2cc11da8a82b4/techlibs/xilinx/cells_sim.v#L376-L380) provided by the yosys project. However, it is much easier to understand them by reading the [Xilinx documentation](https://www.xilinx.com/support/documentation/user_guides/ug474_7Series_CLB.pdf#page=48). They essentially implement fast carry logic using generate (`DI`) and propagate (`S`) signals. If you never heard about that, you should really [watch this lecture by Professor Arvind](https://youtu.be/VoIxhuhTZbc?t=1813) explaining how it works.
+Of course, you can try to understand what a `CARRY4` does by looking at the [Verilog description of cells](https://github.com/YosysHQ/yosys/blob/a7f2ef6d34c4b336a910b3c6f3d2cc11da8a82b4/techlibs/xilinx/cells_sim.v#L376-L380) provided by the yosys project. However, it is much easier to understand them by reading the [Xilinx documentation](https://www.xilinx.com/support/documentation/user_guides/ug474_7Series_CLB.pdf#page=48). They essentially implement fast carry logic using generate (`DI`) and propagate (`S`) signals. If you never heard about that, you should really [watch this lecture by Professor Arvind](https://youtu.be/VoIxhuhTZbc?t=1813) explaining how it works.
 
 In the case at hand, all generate (`DI`) signals are zero – only the propagate (`S`) signals are used. This means the carry (either from `CI` or from `CYINIT`) is only propagated all the way to the last carry output (MSB of `CO`) if all propagate (`S`) bits are high. So the `CARRY4` cell is essentially being used here as a 4-input AND gate.
 
-So here it is how the 4-bit *equal comparators* are being combined. It all starts at [here](RocketTile.v#L14659), with a `CYINIT` of 1. Then the carry is propagated to other `CARRY4` cells (MSB of `CO` is connected to `CI` of the next cell), until the final result is obtained at the [`trigB` net](RocketTile.v#L14667). An analogous structure exists resulting in the [`trigA` net](RocketTile.v#L14704).
+So here it is how the 4-bit *equal comparators* are being combined. It all starts at [here](RocketTile.v#L14659), with a `CYINIT` of 1. Then the carry is propagated to other `CARRY4` cells (MSB of `CO` is connected to `CI` of the next cell) until the final result is obtained at the [`trigB` net](RocketTile.v#L14667). An analogous structure exists resulting in the [`trigA` net](RocketTile.v#L14704).
 
 Putting it all together:
  * `trigA` is the result of the comparison `\a_data_reg[63] == {_GEN_277[62:0], \trig_mem_data_reg_n_0_[0] }`.
@@ -134,9 +134,9 @@ Putting it all together:
 
 ## WTF is `_GEN_277`?
 
-You probably already know the answer – it's the trigger string (*i.e.* the flag for Part 1). But how is it computed? **At this point, we could say we don't care and just simulate the circuit until some string starting with `CTF-BR{` pops up at `_GEN_277`**.
+You probably already know the answer – it's the trigger string (*i.e.*, the flag for Part 1). But how is it computed? **At this point, we could say we don't care and just simulate the circuit until some string starting with `CTF-BR{` pops up at `_GEN_277`**.
 
-However, since we are ever curious, we look for [the flip-flops driving these signals](Rocket.v#L18853-L19876). These flip-flops are very interesting, because each one has its output `Q` connected to the input `D` of the previous one. Hey, this looks like a *shift register*, shifting bits from MSB to LSB.
+However, since we are ever curious, we look for [the flip-flops driving these signals](Rocket.v#L18853-L19876). These flip-flops are very interesting because each one has its output `Q` connected to the input `D` of the previous one. Hey, this looks like a *shift register*, shifting bits from MSB to LSB.
 
 But there is a catch! The input for instances `\trig_mem_data_reg[120] `, `\trig_mem_data_reg[125] ` and `\trig_mem_data_reg[126] ` does not come directly from the next flip-flop in line. It comes from [some](Rocket.v#L18704-L18722) `.INIT(4'h6)` LUTs. The truth table of these LUTs should be very familiar to you:
 
@@ -146,9 +146,9 @@ $ ./lut.py 6 1
 10
 ```
 
-Wow, these are XOR gates! So let's put it all together. As we have seen, `\trig_mem_data_reg_n_0_[0] ` is the LSB of the shift register; other bits can be obtained from the `_GEN_277` vector. The next value of the MSB comes from the previous value of the LSB. The next value of bits at positions 120, 125 and 126 comes from the previous value of their neighbors XORed with the previous value of the LSB. This is clearly a [LFSR](https://en.wikipedia.org/wiki/Linear-feedback_shift_register), and with these taps, it's a [maximal-length 128-bit LFSR](https://www.ijarset.com/upload/2016/february/12_IJARSET_swetha.pdf).
+Wow, these are XOR gates! So let's put it all together. As we have seen, `\trig_mem_data_reg_n_0_[0] ` is the LSB of the shift register; other bits can be obtained from the `_GEN_277` vector. The next value of the MSB comes from the previous value of the LSB. The next value of bits at positions 120, 125 and 126 comes from the previous value of their neighbors XORed with the LSB's previous value. This is clearly a [LFSR](https://en.wikipedia.org/wiki/Linear-feedback_shift_register), and with these taps, it's a [maximal-length 128-bit LFSR](https://www.ijarset.com/upload/2016/february/12_IJARSET_swetha.pdf).
 
-We could go further on and investigate [net `_T_1927`](Rocket.v#L18730), the enable signal of the LFSR (*i.e.* the LFSR only runs if that signal is high). We won't detail it, but it is essentially another *equal comparator* which checks whether the LSBs of `_GEN_277` are different from `CTF-BR{` (in little endian).
+We could go further on and investigate [net `_T_1927`](Rocket.v#L18730), the enable signal of the LFSR (*i.e.*, the LFSR only runs if that signal is high). We won't detail it, but it is essentially another *equal comparator* which checks whether the LSBs of `_GEN_277` are different from `CTF-BR{` (in little-endian).
 
 This is enough to [write a script](lsfr.py) to collect the initial value of the flip-flops from the netlist and run the LFSR until we obtain the flag.
 
@@ -168,13 +168,13 @@ flag: CTF-BR{G1.d%fXN}
 
 As we say in Portuguese, now the pig twists the tail. So we will only comment on the jump of the cat (meaning we won't detail every boolean algebra manipulation.)
 
-We [already](#locating-the-trojan) located some maliciously-looking `trig_jalr_count` and `trig_pc` registers. The problem statement hinted us that the word just after the trigger sequence is able to affect the control flow and, in fact, these registers can be controlled by a word written to the data cache. The main issue for our analysis is that the logic is now much harder to understand, because different inputs will feed the registers depending on the current state of a state machine.
+We [already](#locating-the-trojan) located some maliciously-looking `trig_jalr_count` and `trig_pc` registers. The problem statement hinted that the word just after the trigger sequence can affect the control flow and, in fact, these registers can be controlled by a word written to the data cache. The main issue is that the logic is now much harder to understand because different inputs will feed the registers depending on the current state of a state machine.
 
 ## The state machine
 
 The current state of the trojan state machine is encoded in a [3-bit register](r/Rocket.v#L20904-L20927). The initial state is zero. Current state is given by `{\trig_state_reg[1]_1 , \trig_state_reg[1]_0 , \trig_state_reg[0]_0 }`, and next state is given by `{mem_ctrl_branch_reg_0, \trig_state[1]_i_1_n_0 , \trig_state[0]_i_1_n_0 }`. This is a hell of similarly named nets, so the first thing we do is to rename these to `{curr_state_2, curr_state_1, curr_state_0}` and `{next_state_2, next_state_1, next_state_0}`, respectively. (It starts to feel like we lost our IDA Pro license and are being forced to use objdump + text editor.)
 
-We now proceed to analyze the combinational logic that computes the next state of the FSM, trying to make sense of each intermediary net:
+We now analyze the combinational logic that computes the next state of the FSM, trying to make sense of each intermediary net:
 
  * [`\trig_state[0]_i_4_n_0 `](r/Rocket.v#L20657-L20663) → `curr_state_is_zero`: `curr_state == 0`.
  * [`\trig_pc_reg[0]_1 `](r/Rocket.v#L10997-L11006) → `jalr_and_count_zero`: `mem_ctrl_jalr && trig_jalr_count == 0`.
@@ -242,7 +242,7 @@ We now proceed to analyze the combinational logic that computes the next state o
    ```
    please note `target_reset` is handled [directly at the flip-flop](r/Rocket.v#L20927) in this case.
 
-Now we replace `curr_state` the expressions above to map the conditions for every possible state transition. From now on, we will omit `target_reset` since it is already clear it resets the state to zero no matter what.
+Now we replace `curr_state` the expressions above to map the conditions for every possible state transition. We will omit `target_reset` since it is already clear it resets the state to zero no matter what.
 
  * `curr_state = 0`:
    * `big_expr_01 = !trig_pc_is_valid_pc`
@@ -308,12 +308,12 @@ Now we replace `curr_state` the expressions above to map the conditions for ever
 
 ![FSM diagram](fsm.svg)
 
-Therefore, the FSM has 5 states. As [we might already expect](#constructing-a-bigger-comparator), the transitions `0 -> 1` and `1 -> 2` occur when we write the words comprising the trigger sequence. Transition `2 -> 3` occurs when `trigB` turns to false, *i.e.* when someone writes something different from the second word of the trigger sequence, therefore this should be the moment when the attacker provides instructions as to how the control flow should be modified. Transition `3 -> 0` occurs when we run a `jalr` instruction (`mem_ctrl_jalr` signal) and the `trig_jalr_count` register reaches zero. Transition `any -> 4` occurs when the program counter reaches `trig_pc` and `trig_pc_valid` is true. Transitions `4 -> 0` occurs when we run a branch instruction (`mem_ctrl_branch` signal).
+Therefore, the FSM has 5 states. As [we might already expect](#constructing-a-bigger-comparator), the transitions `0 -> 1` and `1 -> 2` occur when we write the words comprising the trigger sequence. Transition `2 -> 3` occurs when `trigB` turns to false, *i.e.*, when someone writes something different from the second word of the trigger sequence. Therefore, this should be the moment when the attacker provides instructions as to how the control flow should be modified. Transition `3 -> 0` occurs when we run a `jalr` instruction (`mem_ctrl_jalr` signal) and the `trig_jalr_count` register reaches zero. Transition `any -> 4` occurs when the program counter reaches `trig_pc` and `trig_pc_valid` is true. Transitions `4 -> 0` occurs when we run a branch instruction (`mem_ctrl_branch` signal).
 
 
 ## Trojan registers
 
- * [trig_jalr_count](r/Rocket.v#L18663-L18702) is a 4-bit register whose inputs [are fed](r/Rocket.v#L18586-L18623) with `\a_data_reg[63] [3:0]` whenever `curr_state == 2`, otherwise it gets its current value subtracted by one. The register [is enabled](r/Rocket.v#L18624-L18633) (*i.e.* is updated with its input) whenever:
+ * [trig_jalr_count](r/Rocket.v#L18663-L18702) is a 4-bit register whose inputs [are fed](r/Rocket.v#L18586-L18623) with `\a_data_reg[63] [3:0]` whenever `curr_state == 2`, otherwise it gets its current value subtracted by one. The register [is enabled](r/Rocket.v#L18624-L18633) (*i.e.*, is updated with its input) whenever:
    ```
    !trig_pc_is_valid_pc && (
        (curr_state == 3) ? (mem_ctrl_jalr && trig_jalr_count != 0) :
@@ -347,7 +347,7 @@ Therefore, the FSM has 5 states. As [we might already expect](#constructing-a-bi
 
 # Exploiting Dropbear
 
-If we study Dropbear's source code, we will realize the password is copied at the [`buf_getstring` function](https://github.com/mkj/dropbear/blob/b4bd23b4d2a4c640880b49069e02cd598dd03416/buffer.c#L223). If we provide the trigger sequence as a password, this causes the trojan to activate inside the `memcpy` function. However, it is not practical to set `trig_pc` at the first `jalr` since we don't know where the libc is located in memory. Therefore, we wait for one more `jalr` instruction, so that we can catch the PC when it is returning from the `buf_incrpos` function that is called [just after](https://github.com/mkj/dropbear/blob/b4bd23b4d2a4c640880b49069e02cd598dd03416/buffer.c#L224) `memcpy`. That `jalr` instruction is located at [`0x143bc`](dropbear.txt#L1495).
+If we study Dropbear's source code, we will realize the password is copied at the [`buf_getstring` function](https://github.com/mkj/dropbear/blob/b4bd23b4d2a4c640880b49069e02cd598dd03416/buffer.c#L223). If we provide the trigger sequence as a password, this causes the trojan to activate inside the `memcpy` function. However, it is not practical to set `trig_pc` at the first `jalr` since we don't know where the libc is located in memory. Therefore, we wait for one more `jalr` instruction so that we can catch the PC when returning from the `buf_incrpos` function called [just after](https://github.com/mkj/dropbear/blob/b4bd23b4d2a4c640880b49069e02cd598dd03416/buffer.c#L224) `memcpy`. That `jalr` instruction is located at [`0x143bc`](dropbear.txt#L1495).
 
 Then, we can target the [`constant_time_memcmp` function](https://github.com/mkj/dropbear/blob/02ffdd09dc1941f7a924cde8db288fcd64987f59/dbutil.c#L596) at [`0x1f7d0`](dropbear.txt#L13020), which is used to [check passwords](https://github.com/mkj/dropbear/blob/8b4f60a7a113f4e9ae801dea88606f2663728f03/svr-authpasswd.c#L46), forcing the branch at [`0x1f7dc`](dropbear.txt#L13023) to flip its condition and causing the function to return zero even if the strings are different.
 
@@ -371,9 +371,9 @@ $ ./solver.py
 
 # Suggestions for future work
 
-[HAL](https://github.com/emsec/hal) is a very promising tool which would have made this challenge much more tractable, since it allows you to visualize and navigate more easily through the netlist. We actually tried to solve this challenge using HAL, but had several issues. First of all, HAL does not support the syntax for renaming ports in the module port list (but hey, lots of tools also lack support for that syntax). After fixing that, we had problems with `CARRY4` and other cells that have multi-bit ports, so we gave up. If you get around these issues, please publish a write-up. We would be very interested in seeing alternate solutions of this challenge.
+[HAL](https://github.com/emsec/hal) is a very promising tool that would have made this challenge much more tractable since it allows you to visualize and navigate more easily through the netlist. We actually tried to solve this challenge using HAL but had several issues. First of all, HAL does not support the syntax for renaming ports in the module port list (but hey, lots of tools also lack support for that syntax). After fixing that, we had problems with `CARRY4` and other cells that have multi-bit ports, so we gave up. If you get around these issues, please publish a write-up. We would be very interested in seeing alternate solutions to this challenge.
 
-Some tool to automatically analyze FSMs would also have helped a lot. The HAL developers [have proposed some algorithms](https://tches.iacr.org/index.php/TCHES/article/view/7277/6455), but they are not implemented as a HAL plugin yet. Yosys is able to extract FSMs [from RTL designs](https://stackoverflow.com/a/32648163/13649511), but [not from netlists](https://stackoverflow.com/a/61632757/13649511). Maybe [yosys-smtbmc](http://zipcpu.com/blog/2017/10/19/formal-intro.html) could help. If you manage to automate the [FSM analysis](#the-state-machine), please write about it and share with us.
+A tool to automatically analyze FSMs would also have helped a lot. The HAL developers [have proposed some algorithms](https://tches.iacr.org/index.php/TCHES/article/view/7277/6455), but they are not implemented as a HAL plugin yet. Yosys is able to extract FSMs [from RTL designs](https://stackoverflow.com/a/32648163/13649511), but [not from netlists](https://stackoverflow.com/a/61632757/13649511). Maybe [yosys-smtbmc](http://zipcpu.com/blog/2017/10/19/formal-intro.html) could help. If you manage to automate the [FSM analysis](#the-state-machine), please write about it and share it with us.
 
 
 # Where can I learn more?
