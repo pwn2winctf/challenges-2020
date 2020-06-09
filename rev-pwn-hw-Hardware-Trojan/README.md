@@ -242,7 +242,7 @@ We now analyze the combinational logic that computes the next state of the FSM, 
    ```
    please note `target_reset` is handled [directly at the flip-flop](r/Rocket.v#L20927) in this case.
 
-Now we replace `curr_state` the expressions above to map the conditions for every possible state transition. We will omit `target_reset` since it is already clear it resets the state to zero no matter what.
+Now we replace `curr_state` in the expressions above to map the conditions for every possible state transition. We will omit `target_reset` since it is already clear it resets the state to zero no matter what.
 
  * `curr_state = 0`:
    * `big_expr_01 = !trig_pc_is_valid_pc`
