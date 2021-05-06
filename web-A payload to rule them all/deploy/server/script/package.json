@@ -12,6 +12,6 @@
     "libxmljs": "^0.19.7",
     "mysql": "^2.18.1",
     "puppeteer": "^2.1.1",
-    "sanitize-html": "^1.22.1"
+    "sanitize-html": "^2.3.2"
   }
 }
